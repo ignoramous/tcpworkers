@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "allowJs": true
+  },
+  "lint": {
+    "files": {
+      "exclude": ["**/**"]
+    }
+  },
+  "fmt": {
+    "files": {
+      "exclude": ["**/**"]
+    }
+  }
+}
