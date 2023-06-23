@@ -67,10 +67,10 @@ export async function chunk(req) {
       }
     }
     rdr.releaseLock();
-    await ingress.cancel();
+    // await ingress.cancel();
     await wtr.ready;
     wtr.releaseLock();
-    await egress.writable.close();
+    // await egress.writable.close();
 
     return new Response(egress.readable, { headers: hdr });
   } catch (ex) {
