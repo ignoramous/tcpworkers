@@ -1,0 +1,7 @@
+name = "tcpworkers"
+main = "pip.js"
+usage_model = "unbound"
+compatibility_date = "2023-06-19"
+workers_dev = true
+compatibility_flags = [ "nodejs_compat" ]
+
