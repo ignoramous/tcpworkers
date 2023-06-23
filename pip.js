@@ -62,9 +62,6 @@ export async function chunk(req) {
     await wtr.ready;
     await egress.writable.close();
 
-    const canread = egress.readable instanceof ReadableStream;
-    const locked = egress.readable.locked;
-    console.debug("chunk: rw", addr, "y?", canread, "/ not-ok?", locked);
     return new Response(egress.readable, { headers: hdr });
   } catch (ex) {
     console.error("chunk: err", ex);
@@ -103,17 +100,6 @@ export async function pipeWithoutPreventClose(req) {
     const egress = connect(addr, opts);
     ingress.pipeTo(egress.writable);
 
-    const canread = egress.readable instanceof ReadableStream;
-    const locked = egress.readable.locked;
-    console.debug(
-      "pipeWithoutPreventClose: rw",
-      addr,
-      "y?",
-      canread,
-      "/ not-ok?",
-      locked
-    );
-
     return new Response(egress.readable, { headers: hdr });
   } catch (ex) {
     console.error("pipeWithoutPreventClose: err", ex);
@@ -132,17 +118,6 @@ export async function pipePreventClose(req) {
     console.debug("pipePreventClose: connect", addr);
     const egress = connect(addr, opts);
     ingress.pipeTo(egress.writable, { preventClose: true });
-
-    const canread = egress.readable instanceof ReadableStream;
-    const locked = egress.readable.locked;
-    console.debug(
-      "pipePreventClose: rw",
-      addr,
-      "y?",
-      canread,
-      "/ not-ok?",
-      locked
-    );
 
     return new Response(egress.readable, { headers: hdr });
   } catch (ex) {
