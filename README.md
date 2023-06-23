@@ -9,7 +9,7 @@ but it isn't piping the `Request.body` (*ReadableStream*) through to `Socket.wri
 - [`test.js`](https://github.com/ignoramous/tcpworkers/blob/bcdbb86c110b9999e4a7020d6962fd0be2be033f/test.js) uses Deno to make full duplex `fetch` calls
   into Workers to help test the four functions mentioned above with help of [an echo server deployed at midway.fly.dev:5001](https://github.com/celzero/midway).
 
-Steps:
+Instructions:
 ```bash
 # after git clone
 # globally install wrangler, if needed
@@ -22,4 +22,7 @@ wrangler deploy
 # edit ./test.js to point to your workers.dev url
 # install deno deno.com/manual/getting_started/installation, then:
 ./test.js
+
+# test the echo server
+echo "hello" | nc midway.fly.dev 5001
 ```
