@@ -98,6 +98,7 @@ export async function fixed(req) {
 }
 
 // pipe request to socket, without preventClose=true
+// never works
 export async function pipeWithoutPreventClose(req) {
   const ingress = req.body;
 
@@ -106,7 +107,9 @@ export async function pipeWithoutPreventClose(req) {
   try {
     console.debug("pipeWithoutPreventClose: connect", addr);
     const egress = await Deno.connect(addr);
-    ingress.pipeTo(egress.writable);
+    const its = new TransformStream();
+    ingress.pipeTo(its.writable);
+    its.readable.pipeTo(egress.writable);
 
     return new Response(egress.readable, { headers: hdr });
   } catch (ex) {

@@ -23,8 +23,8 @@ wrangler deploy
 # install deno deno.com/manual/getting_started/installation, then:
 ./test.js
 
-# notice log output showing Deno Deploy working fine (recieves
-# non-zero length content) but Workers runs do not.
+# notice log output showing 3 fns w Deno Deploy working fine (recieve
+# non-zero length content) but only 1 fn in Workers does.
 
 # test the echo server
 echo "hello" | nc midway.fly.dev 5001
