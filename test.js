@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: 0BSD
 const verbose = false;
 const cfbase = "https://tcpworkers.nile.workers.dev/";
-const ddbase = "https://duplex.deno.dev/";
+const ddbase = "https://midway.deno.dev/";
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 

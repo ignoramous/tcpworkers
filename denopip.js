@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 
 const r400 = new Response(null, { status: 400 });
 const r500 = new Response(null, { status: 500 });
-
+const enc = new TextEncoder();
 // echo tcp server
 // echo "hello" | nc midway.fly.dev 5001
 const addr = { hostname: "midway.fly.dev", port: 5001 };
@@ -21,7 +21,7 @@ async function handle(req) {
   } else if (u.pathname.startsWith("/empty1")) {
     return pipeWithoutPreventClose(req); // ok
   } else if (u.pathname.startsWith("/empty2")) {
-    return pipe(req); // ok
+    return pipe(req.body, addr); // ok
   } else if (u.pathname.startsWith("/p")) {
     const p = u.pathname.split("/");
 
@@ -51,7 +51,7 @@ export async function chunk(req) {
 
   try {
     console.debug("chunk: connect", addr);
-    const egress = Deno.connect(addr, opts);
+    const egress = await Deno.connect(addr);
     const rdr = ingress.getReader();
     const wtr = egress.writable.getWriter();
 
@@ -67,9 +67,9 @@ export async function chunk(req) {
       }
     }
     rdr.releaseLock();
-    wtr.releaseLock();
     await ingress.cancel();
     await wtr.ready;
+    wtr.releaseLock();
     await egress.writable.close();
 
     return new Response(egress.readable, { headers: hdr });
@@ -83,7 +83,7 @@ export async function chunk(req) {
 export async function fixed(req) {
   try {
     console.log("fixed: connect", addr);
-    const socket = Deno.connect(addr, opts);
+    const socket = await Deno.connect(addr);
 
     const writer = socket.writable.getWriter();
     const u8 = enc.encode("GET IPADDR\r\n");
@@ -105,7 +105,7 @@ export async function pipeWithoutPreventClose(req) {
 
   try {
     console.debug("pipeWithoutPreventClose: connect", addr);
-    const egress = connect(addr, opts);
+    const egress = await Deno.connect(addr);
     ingress.pipeTo(egress.writable);
 
     return new Response(egress.readable, { headers: hdr });
@@ -126,7 +126,7 @@ async function pipe(ingress, addr) {
 
     return new Response(egress.readable, { headers: hdr });
   } catch (ex) {
-    console.error("pipePreventClose: err", ex);
+    console.error("pipe: err", ex);
     return r500;
   }
 }

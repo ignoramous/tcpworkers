@@ -23,6 +23,9 @@ wrangler deploy
 # install deno deno.com/manual/getting_started/installation, then:
 ./test.js
 
+# notice log output showing Deno Deploy working fine (recieves
+# non-zero length content) but Workers runs do not.
+
 # test the echo server
 echo "hello" | nc midway.fly.dev 5001
 ```
