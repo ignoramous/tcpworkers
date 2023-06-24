@@ -24,7 +24,7 @@ wrangler deploy
 ./test.js
 
 # notice log output showing 3 fns w Deno Deploy working fine (recieve
-# non-zero length content) but only 1 fn in Workers does.
+# non-zero length content) but only 1 fn with Workers does.
 
 # test the echo server
 echo "hello" | nc midway.fly.dev 5001
