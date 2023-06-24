@@ -1,3 +1,7 @@
+This is a test repository. Prod at [serverless-proxy](https://github.com/serverless-proxy/serverless-proxy).
+
+---
+
 Attempt a full duplex ([ref](https://developer.chrome.com/articles/fetch-streaming-requests)) request / response with Socket Workers.
 
 - [`pip.js`](https://github.com/ignoramous/tcpworkers/blob/bcdbb86c110b9999e4a7020d6962fd0be2be033f/pip.js) attempts full duplex
