@@ -21,10 +21,10 @@ export default {
       return chunk(req); // ok
     } else if (u.pathname.startsWith("/fixed")) {
       return fixed(req); // ok
-    } else if (u.pathname.startsWith("/pipe")) {
-      return pipe(req, ctx); // ok
     } else if (u.pathname.startsWith("/pipe2")) {
       return pipe2(req, ctx); // ok
+    } else if (u.pathname.startsWith("/pipe")) {
+      return pipe(req, ctx); // ok
     }
     console.log("/chunk (bad), /fixed (ok), /empty1 (bad), /empty2 (bad)");
     return r400;

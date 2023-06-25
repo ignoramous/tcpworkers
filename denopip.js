@@ -18,10 +18,10 @@ async function handle(req) {
     return chunk(req); // ok
   } else if (u.pathname.startsWith("/fixed")) {
     return fixed(req); // ok
-  } else if (u.pathname.startsWith("/pipe")) {
-    return pipe(req); // ok
   } else if (u.pathname.startsWith("/pipe2")) {
     return pipe2(req.body, addr); // ok
+  } else if (u.pathname.startsWith("/pipe")) {
+    return pipe(req); // ok
   } else if (u.pathname.startsWith("/p")) {
     const p = u.pathname.split("/");
 
@@ -104,7 +104,7 @@ export async function pipe(req) {
   try {
     console.debug("pipe: connect", addr);
     const egress = await Deno.connect(addr);
-    ingress.readable.pipeTo(egress.writable);
+    ingress.pipeTo(egress.writable);
 
     return new Response(egress.readable, { headers: hdr });
   } catch (ex) {
