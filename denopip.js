@@ -102,15 +102,13 @@ export async function pipe(req) {
   if (ingress == null) return r400;
 
   try {
-    console.debug("pipeWithoutPreventClose: connect", addr);
+    console.debug("pipe: connect", addr);
     const egress = await Deno.connect(addr);
-    const its = new TransformStream();
-    ingress.pipeTo(its.writable);
-    its.readable.pipeTo(egress.writable);
+    ingress.readable.pipeTo(egress.writable);
 
     return new Response(egress.readable, { headers: hdr });
   } catch (ex) {
-    console.error("pipeWithoutPreventClose: err", ex);
+    console.error("pipe: err", ex);
     return r500;
   }
 }
@@ -118,7 +116,7 @@ export async function pipe(req) {
 // pipe request to socket w preventClose=true
 async function pipe2(ingress, addr) {
   try {
-    console.debug("pipe: connect", addr);
+    console.debug("pipe2: connect", addr);
     // Deno.connect is limited on free plans
     const egress = await Deno.connect(addr);
 
@@ -126,7 +124,7 @@ async function pipe2(ingress, addr) {
 
     return new Response(egress.readable, { headers: hdr });
   } catch (ex) {
-    console.error("pipe: err", ex);
+    console.error("pipe2: err", ex);
     return r500;
   }
 }
