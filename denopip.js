@@ -94,7 +94,7 @@ export async function fixed(req) {
   }
 }
 
-// pipe request to socket, without preventClose=true
+// pipe request to socket w preventClose=true
 // never works
 export async function pipe(req) {
   const ingress = req.body;
@@ -104,7 +104,7 @@ export async function pipe(req) {
   try {
     console.debug("pipe: connect", addr);
     const egress = await Deno.connect(addr);
-    ingress.pipeTo(egress.writable);
+    ingress.pipeTo(egress.writable, { preventClose: true} );
 
     return new Response(egress.readable, { headers: hdr });
   } catch (ex) {
@@ -113,7 +113,7 @@ export async function pipe(req) {
   }
 }
 
-// pipe request to socket w preventClose=true
+// pipe2 request to socket(addr) w preventClose=true
 async function pipe2(ingress, addr) {
   try {
     console.debug("pipe2: connect", addr);
