@@ -18,25 +18,25 @@ async function handle(req) {
     return chunk(req); // ok
   } else if (u.pathname.startsWith("/fixed")) {
     return fixed(req); // ok
-  } else if (u.pathname.startsWith("/empty1")) {
-    return pipeWithoutPreventClose(req); // ok
-  } else if (u.pathname.startsWith("/empty2")) {
-    return pipe(req.body, addr); // ok
+  } else if (u.pathname.startsWith("/pipe")) {
+    return pipe(req); // ok
+  } else if (u.pathname.startsWith("/pipe2")) {
+    return pipe2(req.body, addr); // ok
   } else if (u.pathname.startsWith("/p")) {
     const p = u.pathname.split("/");
 
     const ingress = req.body;
 
-    if (p.length < 3) return pipe(ingress, addr);
+    if (p.length < 3) return pipe2(ingress, addr);
 
     const dst = p[2];
-    if (!dst) return pipe(ingress, addr);
+    if (!dst) return pipe2(ingress, addr);
 
     const dstport = p[3] || "443";
     const proto = p[4] || "tcp";
     const uaddr = { hostname: dst, port: dstport, transport: proto };
 
-    return pipe(ingress, uaddr);
+    return pipe2(ingress, uaddr);
   }
   console.log("/chunk (bad), /fixed (ok), /empty1 (bad), /empty2 (bad)");
   return r400;
@@ -67,10 +67,7 @@ export async function chunk(req) {
       }
     }
     rdr.releaseLock();
-    // await ingress.cancel();
-    await wtr.ready;
     wtr.releaseLock();
-    // await egress.writable.close();
 
     return new Response(egress.readable, { headers: hdr });
   } catch (ex) {
@@ -99,7 +96,7 @@ export async function fixed(req) {
 
 // pipe request to socket, without preventClose=true
 // never works
-export async function pipeWithoutPreventClose(req) {
+export async function pipe(req) {
   const ingress = req.body;
 
   if (ingress == null) return r400;
@@ -119,7 +116,7 @@ export async function pipeWithoutPreventClose(req) {
 }
 
 // pipe request to socket w preventClose=true
-async function pipe(ingress, addr) {
+async function pipe2(ingress, addr) {
   try {
     console.debug("pipe: connect", addr);
     // Deno.connect is limited on free plans

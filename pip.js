@@ -18,13 +18,13 @@ export default {
   async fetch(req, env, ctx) {
     const u = new URL(req.url);
     if (u.pathname.startsWith("/chunk")) {
-      return chunk(req); // bad
+      return chunk(req); // ok
     } else if (u.pathname.startsWith("/fixed")) {
       return fixed(req); // ok
-    } else if (u.pathname.startsWith("/empty1")) {
-      return pipeWithoutPreventClose(req); // bad
-    } else if (u.pathname.startsWith("/empty2")) {
-      return pipePreventClose(req); // bad
+    } else if (u.pathname.startsWith("/pipe")) {
+      return pipe(req, ctx); // ok
+    } else if (u.pathname.startsWith("/pipe2")) {
+      return pipe2(req, ctx); // ok
     }
     console.log("/chunk (bad), /fixed (ok), /empty1 (bad), /empty2 (bad)");
     return r400;
@@ -58,9 +58,6 @@ export async function chunk(req) {
     }
     rdr.releaseLock();
     wtr.releaseLock();
-    await ingress.cancel();
-    await wtr.ready;
-    await egress.writable.close();
 
     return new Response(egress.readable, { headers: hdr });
   } catch (ex) {
@@ -88,40 +85,72 @@ export async function fixed(req) {
   }
 }
 
-// pipe request to socket, without preventClose=true
+// pipe request to socket, with preventClose=true
 // socket.readable is always empty
-export async function pipeWithoutPreventClose(req) {
+export async function pipe(req, ctx) {
   const ingress = req.body;
 
   if (ingress == null) return r400;
 
   try {
-    console.debug("pipeWithoutPreventClose: connect", addr);
+    console.debug("pipe: connect", addr);
     const egress = connect(addr, opts);
-    ingress.pipeTo(egress.writable);
+
+    ctx.waitUntil(ingress.pipeTo(egress.writable, { preventClose: true }));
 
     return new Response(egress.readable, { headers: hdr });
   } catch (ex) {
-    console.error("pipeWithoutPreventClose: err", ex);
+    console.error("pipe: err", ex);
     return r500;
   }
 }
 
 // pipe request to socket with preventClose=true
 // infinitely hangs
-export async function pipePreventClose(req) {
+export async function pipe2(req, ctx) {
   const ingress = req.body;
 
   if (ingress == null) return r400;
 
   try {
-    console.debug("pipePreventClose: connect", addr);
+    console.debug("pipe2: connect", addr);
     const egress = connect(addr, opts);
-    ingress.pipeTo(egress.writable, { preventClose: true });
+
+    const wtr = await nopCloseWriter(egress.writable);
+    ctx.waitUntil(ingress.pipeTo(wtr));
 
     return new Response(egress.readable, { headers: hdr });
   } catch (ex) {
-    console.error("pipePreventClose: err", ex);
+    console.error("pipe2: err", ex);
     return r500;
   }
+}
+
+/**
+ * nopCloseWriter returns a WritableStream that wraps w but does not
+ * close it on Close.
+ * @param {WritableStream} w
+ * @returns
+ */
+async function nopCloseWriter(w) {
+  const underlying = w.getWriter();
+  await underlying.ready;
+  console.log("nopCloseWriter: ready");
+  return new WritableStream({
+    // developer.mozilla.org/en-US/docs/Web/API/WritableStream/WritableStream
+    write(b) {
+      console.debug("nopCloseWriter: write");
+      return underlying.write(b);
+    },
+    // developer.mozilla.org/en-US/docs/Web/API/WritableStream/close
+    close() {
+      console.debug("nopCloseWriter: close");
+      underlying.releaseLock();
+    },
+    // developer.mozilla.org/en-US/docs/Web/API/WritableStream/abort
+    abort(why) {
+      console.debug("nopCloseWriter: abort", why);
+      return w.abort(why);
+    },
+  });
 }

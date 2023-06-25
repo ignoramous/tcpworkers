@@ -4,13 +4,13 @@ This is a test repository. Prod at [serverless-proxy](https://github.com/serverl
 
 Attempt a full duplex ([ref](https://developer.chrome.com/articles/fetch-streaming-requests)) request / response with Socket Workers.
 
-- [`pip.js`](https://github.com/ignoramous/tcpworkers/blob/bcdbb86c110b9999e4a7020d6962fd0be2be033f/pip.js) attempts full duplex
+- [`pip.js`](https://github.com/ignoramous/tcpworkers/blob/main/pip.js) attempts full duplex
   req / res with 3 functions that use 3 subtly different techniques to do so:
-   - `chunk`, `pipePreventClose`, and `pipeWithoutPreventClose`. None succeed.
-   - The other function, `fixed` (derived from [Cloudflare's documentation](https://developers.cloudflare.com/workers/runtime-apis/tcp-sockets)) works,
-but it isn't piping the `Request.body` (*ReadableStream*) through to `Socket.writable`.
-
-- [`test.js`](https://github.com/ignoramous/tcpworkers/blob/bcdbb86c110b9999e4a7020d6962fd0be2be033f/test.js) uses Deno to make full duplex `fetch` calls
+   - `chunk`, `pipe`, and `pipe2`. All succeed.
+   - The other function, `fixed` (derived from [Cloudflare's documentation](https://developers.cloudflare.com/workers/runtime-apis/tcp-sockets)) works, but it isn't piping the `Request.body` (*ReadableStream*) through to `Socket.writable`.
+- [`denopip.js`](https://github.com/ignoramous/tcpworkers/blob/main/denopip.js) does the same thing as
+  `pip.js` but for the Deno Deploy platform.
+- [`test.js`](https://github.com/ignoramous/tcpworkers/blob/main/test.js) uses Deno to make full duplex `fetch` calls
   into Workers to help test the four functions mentioned above with help of [an echo server deployed at midway.fly.dev:5001](https://github.com/celzero/midway).
 
 Instructions:
@@ -23,12 +23,9 @@ npm i wrangler@3 -g
 # developers.cloudflare.com/workers/wrangler/install-and-update/
 wrangler deploy
 
-# edit ./test.js to point to your workers.dev url
+# edit ./test.js to point to your workers.dev and deno-deploy url
 # install deno deno.com/manual/getting_started/installation, then:
 ./test.js
-
-# notice log output showing 3 fns w Deno Deploy working fine (recieve
-# non-zero length content) but only 1 fn with Workers does.
 
 # test the echo server
 echo "hello" | nc midway.fly.dev 5001
