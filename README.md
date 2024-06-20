@@ -30,3 +30,8 @@ wrangler deploy
 # test the echo server
 echo "hello" | nc midway.fly.dev 5001
 ```
+
+---
+
+This proxy is deployed to production at `https://ken.rethinkdns.com/` for anti-censorship and anti-surveillance
+purposes by the [Rethink Open Source Project](https://github.com/celzero/rethink-app).
